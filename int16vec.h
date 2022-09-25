@@ -8,7 +8,10 @@
 #define newp(type)    ((type*)malloc(sizeof(type)))
 #define newn(type, n) ((type*)malloc(sizeof(type) * (n)))
 
+#define MAX(a, b) ((a) >= (b) ? (a) : (b))
+
 #define THE_DEFAULT 0
+#define INT16VEC_MAXSIZE (SIZE_MAX - 100)
 
 typedef struct int16vec {
   int16_t* buf;
@@ -40,8 +43,14 @@ int i_int16vec_resize(int16vec* v, size_t tgtlen) {
   if (tgtlen * 4 < v->cap * 3) {  // if tgtlen < 3/4 cap
     return 0;
   }
-  // else set cap = 2 * tgtlen
-  size_t tgtcap = tgtlen << 1;
+  // else set cap = 2 * max(tgtlen, cap)
+  size_t tgtcap = MAX(tgtlen, v->cap) << 1;
+  if (tgtcap < v->cap) {  // if overflow
+    if (v->cap == INT16VEC_MAXSIZE) {
+      return 0;
+    }
+    tgtcap = INT16VEC_MAXSIZE;
+  }
   int16_t* tmpbuf = (int16_t*)realloc(v->buf, tgtcap * sizeof(int16_t));
   if (!tmpbuf) {
     return 1;
@@ -51,21 +60,35 @@ int i_int16vec_resize(int16vec* v, size_t tgtlen) {
   return 0;
 }
 
-// return 1 if fail to allocate new space for vector, otherwise 0
+static inline int i_int16vec_checkbound(int16vec* v, size_t len) {
+  return len >= v->cap;
+}
+
+// return 1 if fail to allocate new space for vector, 2 if no space available,
+// otherwise 0
 int int16vec_append(int16vec* v, int16_t c) {
   if (i_int16vec_resize(v, v->len + 1)) {  // if err
     return 1;
+  }
+  if (i_int16vec_checkbound(v, v->len + 1)) {
+    return 2;
   }
   v->buf[v->len++] = c;
   return 0;
 }
 
-// return 1 if fail to allocate new space for vector, otherwise 0
+// return 1 if fail to allocate new space for vector, 2 if no space available,
+// otherwise 0
 int int16vec_appendn(int16vec* v, int16_t* p, size_t n) {
   if (i_int16vec_resize(v, v->len + n)) {
     return 1;
   }
+  size_t newlen = v->len + n;
+  if (i_int16vec_checkbound(v, newlen)) {
+    return 2;
+  }
   memcpy(v->buf + v->len, p, n * sizeof(int16_t));
+  v->len = newlen;
   return 0;
 }
 

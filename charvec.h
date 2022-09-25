@@ -8,7 +8,10 @@
 #define newp(type)    ((type*)malloc(sizeof(type)))
 #define newn(type, n) ((type*)malloc(sizeof(type) * (n)))
 
+#define MAX(a, b) ((a) >= (b) ? (a) : (b))
+
 #define THE_DEFAULT 0
+#define CHARVEC_MAXSIZE (SIZE_MAX - 100)
 
 typedef struct charvec {
   char* buf;
@@ -40,8 +43,14 @@ int i_charvec_resize(charvec* v, size_t tgtlen) {
   if (tgtlen * 4 < v->cap * 3) {  // if tgtlen < 3/4 cap
     return 0;
   }
-  // else set cap = 2 * tgtlen
-  size_t tgtcap = tgtlen << 1;
+  // else set cap = 2 * max(tgtlen, cap)
+  size_t tgtcap = MAX(tgtlen, v->cap) << 1;
+  if (tgtcap < v->cap) {  // if overflow
+    if (v->cap == CHARVEC_MAXSIZE) {
+      return 0;
+    }
+    tgtcap = CHARVEC_MAXSIZE;
+  }
   char* tmpbuf = (char*)realloc(v->buf, tgtcap * sizeof(char));
   if (!tmpbuf) {
     return 1;
@@ -51,21 +60,35 @@ int i_charvec_resize(charvec* v, size_t tgtlen) {
   return 0;
 }
 
-// return 1 if fail to allocate new space for vector, otherwise 0
+static inline int i_charvec_checkbound(charvec* v, size_t len) {
+  return len >= v->cap;
+}
+
+// return 1 if fail to allocate new space for vector, 2 if no space available,
+// otherwise 0
 int charvec_append(charvec* v, char c) {
   if (i_charvec_resize(v, v->len + 1)) {  // if err
     return 1;
+  }
+  if (i_charvec_checkbound(v, v->len + 1)) {
+    return 2;
   }
   v->buf[v->len++] = c;
   return 0;
 }
 
-// return 1 if fail to allocate new space for vector, otherwise 0
+// return 1 if fail to allocate new space for vector, 2 if no space available,
+// otherwise 0
 int charvec_appendn(charvec* v, char* p, size_t n) {
   if (i_charvec_resize(v, v->len + n)) {
     return 1;
   }
+  size_t newlen = v->len + n;
+  if (i_charvec_checkbound(v, newlen)) {
+    return 2;
+  }
   memcpy(v->buf + v->len, p, n * sizeof(char));
+  v->len = newlen;
   return 0;
 }
 

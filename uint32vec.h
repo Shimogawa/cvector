@@ -8,7 +8,10 @@
 #define newp(type)    ((type*)malloc(sizeof(type)))
 #define newn(type, n) ((type*)malloc(sizeof(type) * (n)))
 
+#define MAX(a, b) ((a) >= (b) ? (a) : (b))
+
 #define THE_DEFAULT 0
+#define UINT32VEC_MAXSIZE (SIZE_MAX - 100)
 
 typedef struct uint32vec {
   uint32_t* buf;
@@ -40,8 +43,14 @@ int i_uint32vec_resize(uint32vec* v, size_t tgtlen) {
   if (tgtlen * 4 < v->cap * 3) {  // if tgtlen < 3/4 cap
     return 0;
   }
-  // else set cap = 2 * tgtlen
-  size_t tgtcap = tgtlen << 1;
+  // else set cap = 2 * max(tgtlen, cap)
+  size_t tgtcap = MAX(tgtlen, v->cap) << 1;
+  if (tgtcap < v->cap) {  // if overflow
+    if (v->cap == UINT32VEC_MAXSIZE) {
+      return 0;
+    }
+    tgtcap = UINT32VEC_MAXSIZE;
+  }
   uint32_t* tmpbuf = (uint32_t*)realloc(v->buf, tgtcap * sizeof(uint32_t));
   if (!tmpbuf) {
     return 1;
@@ -51,21 +60,35 @@ int i_uint32vec_resize(uint32vec* v, size_t tgtlen) {
   return 0;
 }
 
-// return 1 if fail to allocate new space for vector, otherwise 0
+static inline int i_uint32vec_checkbound(uint32vec* v, size_t len) {
+  return len >= v->cap;
+}
+
+// return 1 if fail to allocate new space for vector, 2 if no space available,
+// otherwise 0
 int uint32vec_append(uint32vec* v, uint32_t c) {
   if (i_uint32vec_resize(v, v->len + 1)) {  // if err
     return 1;
+  }
+  if (i_uint32vec_checkbound(v, v->len + 1)) {
+    return 2;
   }
   v->buf[v->len++] = c;
   return 0;
 }
 
-// return 1 if fail to allocate new space for vector, otherwise 0
+// return 1 if fail to allocate new space for vector, 2 if no space available,
+// otherwise 0
 int uint32vec_appendn(uint32vec* v, uint32_t* p, size_t n) {
   if (i_uint32vec_resize(v, v->len + n)) {
     return 1;
   }
+  size_t newlen = v->len + n;
+  if (i_uint32vec_checkbound(v, newlen)) {
+    return 2;
+  }
   memcpy(v->buf + v->len, p, n * sizeof(uint32_t));
+  v->len = newlen;
   return 0;
 }
 

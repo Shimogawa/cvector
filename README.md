@@ -8,3 +8,5 @@ You can help!
 
 - insert
 - delete
+- ptrvec (weak refs)
+- structvec (structs in a single arr)
