@@ -94,7 +94,7 @@ inline static float* floatvec_asarr(floatvec* v) {
 // returns the ref of the buffer and frees the object
 inline static float* floatvec_takeownership(floatvec* v, size_t* o_len) {
   float* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

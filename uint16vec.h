@@ -94,7 +94,7 @@ inline static uint16_t* uint16vec_asarr(uint16vec* v) {
 // returns the ref of the buffer and frees the object
 inline static uint16_t* uint16vec_takeownership(uint16vec* v, size_t* o_len) {
   uint16_t* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

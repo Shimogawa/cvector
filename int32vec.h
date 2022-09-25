@@ -94,7 +94,7 @@ inline static int32_t* int32vec_asarr(int32vec* v) {
 // returns the ref of the buffer and frees the object
 inline static int32_t* int32vec_takeownership(int32vec* v, size_t* o_len) {
   int32_t* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

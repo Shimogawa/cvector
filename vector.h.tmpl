@@ -94,7 +94,7 @@ inline static %(type)s* %(name)svec_asarr(%(name)svec* v) {
 // returns the ref of the buffer and frees the object
 inline static %(type)s* %(name)svec_takeownership(%(name)svec* v, size_t* o_len) {
   %(type)s* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

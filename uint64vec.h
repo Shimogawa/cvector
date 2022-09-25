@@ -94,7 +94,7 @@ inline static uint64_t* uint64vec_asarr(uint64vec* v) {
 // returns the ref of the buffer and frees the object
 inline static uint64_t* uint64vec_takeownership(uint64vec* v, size_t* o_len) {
   uint64_t* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

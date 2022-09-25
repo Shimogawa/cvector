@@ -94,7 +94,7 @@ inline static int8_t* int8vec_asarr(int8vec* v) {
 // returns the ref of the buffer and frees the object
 inline static int8_t* int8vec_takeownership(int8vec* v, size_t* o_len) {
   int8_t* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

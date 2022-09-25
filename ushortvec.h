@@ -94,7 +94,7 @@ inline static unsigned short* ushortvec_asarr(ushortvec* v) {
 // returns the ref of the buffer and frees the object
 inline static unsigned short* ushortvec_takeownership(ushortvec* v, size_t* o_len) {
   unsigned short* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

@@ -94,7 +94,7 @@ inline static unsigned long* ulongvec_asarr(ulongvec* v) {
 // returns the ref of the buffer and frees the object
 inline static unsigned long* ulongvec_takeownership(ulongvec* v, size_t* o_len) {
   unsigned long* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

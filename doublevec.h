@@ -94,7 +94,7 @@ inline static double* doublevec_asarr(doublevec* v) {
 // returns the ref of the buffer and frees the object
 inline static double* doublevec_takeownership(doublevec* v, size_t* o_len) {
   double* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

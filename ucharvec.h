@@ -94,7 +94,7 @@ inline static unsigned char* ucharvec_asarr(ucharvec* v) {
 // returns the ref of the buffer and frees the object
 inline static unsigned char* ucharvec_takeownership(ucharvec* v, size_t* o_len) {
   unsigned char* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

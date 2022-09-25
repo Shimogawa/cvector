@@ -94,7 +94,7 @@ inline static short* shortvec_asarr(shortvec* v) {
 // returns the ref of the buffer and frees the object
 inline static short* shortvec_takeownership(shortvec* v, size_t* o_len) {
   short* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

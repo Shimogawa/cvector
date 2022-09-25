@@ -94,7 +94,7 @@ inline static char* charvec_asarr(charvec* v) {
 // returns the ref of the buffer and frees the object
 inline static char* charvec_takeownership(charvec* v, size_t* o_len) {
   char* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

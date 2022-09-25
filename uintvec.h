@@ -94,7 +94,7 @@ inline static unsigned int* uintvec_asarr(uintvec* v) {
 // returns the ref of the buffer and frees the object
 inline static unsigned int* uintvec_takeownership(uintvec* v, size_t* o_len) {
   unsigned int* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }

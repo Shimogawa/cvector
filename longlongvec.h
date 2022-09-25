@@ -94,7 +94,7 @@ inline static long long* longlongvec_asarr(longlongvec* v) {
 // returns the ref of the buffer and frees the object
 inline static long long* longlongvec_takeownership(longlongvec* v, size_t* o_len) {
   long long* buf = v->buf;
-  *o_len = v->len;
+  if (o_len) *o_len = v->len;
   free(v);
   return buf;
 }
