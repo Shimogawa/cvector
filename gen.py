@@ -20,7 +20,7 @@ names = [
     "float",
     "double",
 ]
-types = [
+taips = [
     "char",
     "short",
     "int",
@@ -46,6 +46,6 @@ types = [
 with open("vector.h.tmpl", "r") as f:
     tmpl = f.read()
 
-for i in range(len(names)):
-    with open(f"{names[i]}vec.h", "w") as f:
-        f.write(tmpl % {"name": names[i], "nameup": names[i].upper(), "type": types[i]})
+for name, taip in zip(names, taips):
+    with open(f"{name}vec.h", "w") as f:
+        f.write(tmpl % {"name": name, "nameup": name.upper(), "type": taip})
